@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Музыкальный рекомендатель</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #ffbe0b;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .rating-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .song-list {
+            margin: 1.5rem 0;
+        }
+        
+        .song-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: var(--light);
+            border-radius: 8px;
+        }
+        
+        .song-name {
+            flex: 1;
+        }
+        
+        .rating-input {
+            width: 80px;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--success);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+        
+        .results {
+            margin-top: 2rem;
+        }
+        
+        .result-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .result-title {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .result-item {
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            background: var(--light);
+            border-radius: 6px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .like {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .dislike {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        .error {
+            padding: 1rem;
+            background: #ffebee;
+            color: #d32f2f;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 Музыкальный рекомендатель</h1>
+            <p class="subtitle">8 алгоритмов машинного обучения для вашего плейлиста</p>
+        </header>
+        
+        {% if error %}
+        <div class="error">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <div class="rating-section">
+            <h2>Оцените эти песни (1-10):</h2>
+            <form method="POST">
+                <div class="song-list">
+                    {% for song in songs %}
+                    <div class="song-item">
+                        <span class="song-name">{{ loop.index }}. {{ song }}</span>
+                        <input type="number" 
+                               class="rating-input"
+                               name="song_{{ loop.index0 }}" 
+                               min="1" 
+                               max="10" 
+                               placeholder="1-10">
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="actions">
+                    <button type="submit" name="predict_ratings" class="btn">
+                        Предсказать оценки
+                    </button>
+                    
+                    <button type="submit" name="predict_preferences" class="btn btn-secondary">
+                        Анализ предпочтений
+                    </button>
+                    
+                    <button type="submit" name="analyze_cluster" class="btn">
+                        Анализ кластера
+                    </button>
+                    
+                    <button type="submit" name="analyze_pca" class="btn btn-secondary">
+                        Анализ компонент
+                    </button>
+                    
+                    <button type="submit" name="find_associations" class="btn btn-warning">
+                        Найти ассоциации
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        {% if results.ratings %}
+        <div class="results">
+            <div class="result-section">
+                <h3 class="result-title">🔮 Предсказанные оценки</h3>
+                {% for song, rating in results.ratings.items() %}
+                <div class="result-item">
+                    {{ song }}: <strong>{{ rating }}</strong>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if results.preferences %}
+        <div class="results">
+            <div class="result-section">
+                <h3 class="result-title">❤️ Анализ предпочтений</h3>
+                {% for song, preference in results.preferences.items() %}
+                <div class="result-item">
+                    {{ song }}: 
+                    <span class="{% if 'Нравится' in preference %}like{% else %}dislike{% endif %}">
+                        {{ preference }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if results.cluster %}
+        <div class="results">
+            <div class="result-section">
+                <h3 class="result-title">🔢 Кластерный анализ</h3>
+                <div class="result-item">
+                    {{ results.cluster }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if results.pca %}
+        <div class="results">
+            <div class="result-section">
+                <h3 class="result-title">📊 Анализ главных компонент</h3>
+                <div class="result-item">
+                    {{ results.pca }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if results.associations %}
+        <div class="results">
+            <div class="result-section">
+                <h3 class="result-title">🔄 Ассоциативные правила</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Если нравится</th>
+                            <th>То вероятно нравится</th>
+                            <th>Поддержка</th>
+                            <th>Достоверность</th>
+                            <th>Lift</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rule in results.associations %}
+                        <tr>
+                            <td>
+                                {% for item in rule['antecedents'] %}
+                                    {{ songs[item|int] }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% for item in rule['consequents'] %}
+                                    {{ songs[item|int] }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>{{ "%.3f"|format(rule['support']) }}</td>
+                            <td>{{ "%.3f"|format(rule['confidence']) }}</td>
+                            <td>{{ "%.3f"|format(rule['lift']) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
